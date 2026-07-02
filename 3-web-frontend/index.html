@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="uz" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>AI Dublyaj — Videolarni o'zbek tiliga tarjima qiling</title>
+  <meta name="description" content="Sun'iy intellekt yordamida videolarni chet tilidan o'zbek tiliga avtomatik tarjima va dublyaj." />
+
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#6366f1', dark: '#4f46e5' },
+            surface: { DEFAULT: '#111827', card: '#1f2937', border: '#374151' },
+          },
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+
+<body class="bg-surface text-gray-100 font-sans min-h-screen antialiased selection:bg-brand/40">
+  <div class="max-w-2xl mx-auto px-4 py-10">
+
+    <!-- Sarlavha -->
+    <header class="text-center mb-10">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-brand to-purple-600 mb-4 shadow-lg shadow-brand/30">
+        <svg class="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 10l4.55-2.28A1 1 0 0121 8.62v6.76a1 1 0 01-1.45.9L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+        </svg>
+      </div>
+      <h1 class="text-3xl font-bold tracking-tight">AI Video Dublyaj</h1>
+      <p class="text-gray-400 mt-2">Videolarni chet tilidan <span class="text-brand font-semibold">o'zbek tiliga</span> avtomatik tarjima va ovozlashtiring.</p>
+    </header>
+
+    <!-- Asosiy karta -->
+    <main class="bg-surface-card border border-surface-border rounded-2xl p-6 shadow-xl">
+
+      <!-- 1. Yuklash maydoni (Drag & Drop) -->
+      <section id="upload-section">
+        <div id="dropzone"
+          class="relative border-2 border-dashed border-surface-border rounded-xl p-10 text-center cursor-pointer transition-all hover:border-brand hover:bg-brand/5">
+          <input type="file" id="file-input" accept="video/*" class="hidden" />
+          <svg class="w-12 h-12 mx-auto text-gray-500 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 7.5 7.5 12M12 7.5V21"/>
+          </svg>
+          <p class="text-gray-300 font-medium">Videoni bu yerga tashlang yoki <span class="text-brand">tanlang</span></p>
+          <p class="text-gray-500 text-sm mt-1">MP4, MOV, MKV — 5 soatgacha, 10GB</p>
+        </div>
+
+        <!-- Tanlangan fayl -->
+        <div id="file-preview" class="hidden mt-4 flex items-center gap-3 bg-surface p-3 rounded-lg border border-surface-border">
+          <svg class="w-8 h-8 text-brand shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z"/>
+          </svg>
+          <div class="flex-1 min-w-0">
+            <p id="file-name" class="text-sm font-medium truncate"></p>
+            <p id="file-size" class="text-xs text-gray-500"></p>
+          </div>
+          <button id="file-remove" class="text-gray-500 hover:text-red-400 text-sm">✕</button>
+        </div>
+
+        <!-- YOKI YouTube havolasi -->
+        <div class="mt-4">
+          <div class="flex items-center gap-2">
+            <span class="text-gray-500 text-xs">yoki</span>
+            <div class="flex-1 h-px bg-surface-border"></div>
+          </div>
+          <input id="url-input" type="url" placeholder="🔗 YouTube havolasini joylang (kino/serial)..."
+            class="mt-3 w-full bg-surface border border-surface-border rounded-lg px-4 py-3 text-sm focus:border-brand focus:outline-none" />
+        </div>
+
+        <!-- 2. Ovoz tanlash (Custom Radio) -->
+        <div class="mt-6">
+          <p class="text-sm font-medium text-gray-300 mb-3">Dublyaj ovozi:</p>
+          <div class="grid grid-cols-3 gap-3">
+            <label class="voice-option cursor-pointer">
+              <input type="radio" name="voice" value="auto" class="peer sr-only" checked />
+              <div class="p-4 rounded-xl border border-surface-border text-center transition-all peer-checked:border-brand peer-checked:bg-brand/10">
+                <div class="text-2xl mb-1">🤖</div>
+                <div class="font-medium text-xs">Avtomatik</div>
+              </div>
+            </label>
+            <label class="voice-option cursor-pointer">
+              <input type="radio" name="voice" value="male" class="peer sr-only" />
+              <div class="p-4 rounded-xl border border-surface-border text-center transition-all peer-checked:border-brand peer-checked:bg-brand/10">
+                <div class="text-2xl mb-1">👨</div>
+                <div class="font-medium text-xs">Erkak</div>
+              </div>
+            </label>
+            <label class="voice-option cursor-pointer">
+              <input type="radio" name="voice" value="female" class="peer sr-only" />
+              <div class="p-4 rounded-xl border border-surface-border text-center transition-all peer-checked:border-brand peer-checked:bg-brand/10">
+                <div class="text-2xl mb-1">👩</div>
+                <div class="font-medium text-xs">Ayol</div>
+              </div>
+            </label>
+          </div>
+          <p class="text-gray-500 text-xs mt-2">🤖 Avtomatik — videodagi ovozga qarab erkak/ayol tanlanadi.</p>
+        </div>
+
+        <!-- 3. Boshlash tugmasi -->
+        <button id="start-btn"
+          class="w-full mt-6 bg-brand hover:bg-brand-dark disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-3.5 rounded-xl transition-all shadow-lg shadow-brand/25">
+          🚀 Dublyajni boshlash
+        </button>
+      </section>
+
+      <!-- 4. Progress bo'limi -->
+      <section id="progress-section" class="hidden text-center py-8">
+        <div class="relative w-24 h-24 mx-auto mb-6">
+          <svg class="w-24 h-24 -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#374151" stroke-width="8"/>
+            <circle id="progress-ring" cx="50" cy="50" r="42" fill="none" stroke="#6366f1"
+              stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264"
+              class="transition-all duration-500"/>
+          </svg>
+          <span id="progress-percent" class="absolute inset-0 flex items-center justify-center text-xl font-bold">0%</span>
+        </div>
+        <p id="progress-stage" class="text-lg font-medium text-gray-200">Yuklanmoqda...</p>
+        <p id="progress-eta" class="text-brand text-sm mt-2 font-medium"></p>
+        <p class="text-gray-500 text-sm mt-1">Taxminiy vaqt — video uzunligiga bog'liq.</p>
+      </section>
+
+      <!-- 5. Natija bo'limi -->
+      <section id="result-section" class="hidden">
+        <div class="text-center mb-4">
+          <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-500/20 text-green-400 mb-2">
+            <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          </div>
+          <h2 class="text-xl font-bold">Tayyor! 🎉</h2>
+        </div>
+        <video id="result-video" controls class="w-full rounded-xl border border-surface-border bg-black"></video>
+        <div class="grid grid-cols-2 gap-3 mt-4">
+          <a id="download-btn" href="#" download
+            class="bg-green-600 hover:bg-green-700 text-white text-center font-semibold py-3 rounded-xl transition-all">⬇️ Yuklab olish</a>
+          <button id="restart-btn"
+            class="bg-surface border border-surface-border hover:border-brand text-white font-semibold py-3 rounded-xl transition-all">🔄 Yangi video</button>
+        </div>
+      </section>
+
+      <!-- Xatolik -->
+      <div id="error-box" class="hidden mt-4 bg-red-500/10 border border-red-500/30 text-red-300 text-sm p-4 rounded-xl"></div>
+    </main>
+
+    <!-- APK yuklab olish bloki -->
+    <section class="mt-8 bg-gradient-to-r from-surface-card to-surface-card border border-surface-border rounded-2xl p-6 flex items-center gap-4">
+      <div class="w-14 h-14 rounded-xl bg-green-500/20 flex items-center justify-center shrink-0">
+        <svg class="w-8 h-8 text-green-400" viewBox="0 0 24 24" fill="currentColor"><path d="M17.6 9.48l1.84-3.18a.4.4 0 00-.69-.4l-1.86 3.22a11.36 11.36 0 00-9.78 0L5.25 5.9a.4.4 0 10-.69.4L6.4 9.48A10.78 10.78 0 001 18h22a10.78 10.78 0 00-5.4-8.52zM7 15.25a1 1 0 110-2 1 1 0 010 2zm10 0a1 1 0 110-2 1 1 0 010 2z"/></svg>
+      </div>
+      <div class="flex-1">
+        <h3 class="font-semibold">Android ilovasi</h3>
+        <p class="text-gray-400 text-sm">Mobil ilovani to'g'ridan-to'g'ri yuklab oling.</p>
+      </div>
+      <a href="./downloads/app-release.apk" download
+        class="bg-brand hover:bg-brand-dark text-white font-semibold px-5 py-2.5 rounded-xl whitespace-nowrap transition-all shadow-lg shadow-brand/25">
+        📱 APK yuklash
+      </a>
+    </section>
+
+    <footer class="text-center text-gray-600 text-xs mt-10">
+      &copy; 2026 AI Dublyaj — Barcha huquqlar himoyalangan.
+    </footer>
+  </div>
+
+  <script src="./js/config.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

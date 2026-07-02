@@ -1,0 +1,30 @@
+# GPU (NVIDIA CUDA) uchun backend image — voice cloning (Coqui XTTS v2) + faster-whisper GPU.
+# Faqat NVIDIA GPU + drayver + nvidia-container-toolkit o'rnatilgan hostda ishlaydi.
+# Build:  docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
+
+ENV DEBIAN_FRONTEND=noninteractive PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        python3 python3-pip ffmpeg git \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir --timeout 300 --retries 30 -r requirements.txt
+
+# yt-dlp nightly (YouTube)
+RUN pip3 install --no-cache-dir --pre -U "yt-dlp[default]"
+
+# Voice cloning (GPU) — ISHLAYDIGAN kombinatsiya (pin):
+# torch 2.4.1 (cu121) + transformers 4.46.2 + coqui-tts 0.25.1
+RUN pip3 install --no-cache-dir --timeout 300 --retries 30 torch==2.4.1 torchaudio==2.4.1 \
+        --index-url https://download.pytorch.org/whl/cu121 \
+    && pip3 install --no-cache-dir --timeout 300 --retries 30 "coqui-tts==0.25.1" "transformers==4.46.2"
+
+COPY . .
+RUN mkdir -p storage/uploads storage/outputs storage/temp
+
+EXPOSE 8000
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

@@ -1,0 +1,36 @@
+/* Qo'shimcha uslublar (Tailwind ustiga) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  /* Telegram Web App uchun xavfsiz zonalar */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Drag & drop faol holati */
+#dropzone.dragover {
+  border-color: #6366f1;
+  background-color: rgba(99, 102, 241, 0.08);
+  transform: scale(1.01);
+}
+
+/* Progress halqasining silliq animatsiyasi */
+#progress-ring {
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* Kirish animatsiyasi */
+section {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Scrollbar (dark) */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: #111827; }
+::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }

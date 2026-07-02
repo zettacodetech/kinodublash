@@ -1,0 +1,81 @@
+# Butun tizimni bitta buyruq bilan ishga tushiradi:
+#   docker compose up -d --build
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dubbing
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # Host portini ochmaymiz (tizimdagi postgres 5432 bilan to'qnashmasin)
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: ./1-backend
+    env_file: ./1-backend/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@db:5432/dubbing
+      BASE_URL: http://localhost:8022
+      # Container ichidan host'dagi Ollama'ga ulanish uchun
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      # Coqui XTTS litsenziyasiga avtomatik rozilik (interaktiv so'ramasin)
+      COQUI_TOS_AGREED: "1"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+      - "8022:8000"
+    volumes:
+      - ./1-backend/storage:/app/storage
+      # XTTS modeli keshi (bir marta yuklab, recreate'da yo'qolmasin)
+      - tts-models:/root/.local/share/tts
+
+  # Lokal Telegram Bot API server — 20MB o'rniga 2GB gacha fayl.
+  # IXTIYORIY: faqat "bigfiles" profili bilan ishga tushadi.
+  # api_id / api_hash: https://my.telegram.org dan olinadi (bot .env ga yoziladi).
+  # Yoqish:  docker compose --profile bigfiles up -d
+  telegram-bot-api:
+    image: aiogram/telegram-bot-api:latest
+    profiles: ["bigfiles"]
+    env_file: ./2-telegram-bot/.env
+    environment:
+      TELEGRAM_LOCAL: 1
+    volumes:
+      - tgapi-data:/var/lib/telegram-bot-api
+    restart: unless-stopped
+
+  bot:
+    build: ./2-telegram-bot
+    env_file: ./2-telegram-bot/.env
+    environment:
+      BACKEND_URL: http://api:8000
+    volumes:
+      # Lokal server yuklagan fayllarni bot diskdan o'qishi uchun (bir xil yo'l)
+      - tgapi-data:/var/lib/telegram-bot-api:ro
+    depends_on:
+      - api
+    restart: unless-stopped
+
+  web:
+    image: nginx:alpine
+    volumes:
+      - ./3-web-frontend:/usr/share/nginx/html:ro
+    ports:
+      - "3000:80"
+      - "5000:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  tgapi-data:
+  tts-models:

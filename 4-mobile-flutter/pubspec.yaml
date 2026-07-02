@@ -1,0 +1,23 @@
+name: ai_dubbing
+description: "AI Video Dublyaj — videolarni o'zbek tiliga tarjima qiluvchi mobil ilova."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  image_picker: ^1.1.2      # galereyadan video tanlash
+  dio: ^5.7.0               # yuklash progressi bilan HTTP
+  video_player: ^2.9.2      # natijani ijro etish
+  path_provider: ^2.1.4     # vaqtinchalik fayllar
+  gal: ^2.3.0               # galereyaga saqlash
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

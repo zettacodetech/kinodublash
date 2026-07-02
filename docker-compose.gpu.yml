@@ -1,0 +1,29 @@
+# GPU override — voice cloning (Coqui XTTS) + faster-whisper GPU.
+# Ishlatish (NVIDIA GPU + drayver + nvidia-container-toolkit bo'lgan hostda):
+#   docker compose -f docker-compose.yml -f docker-compose.gpu.yml up -d --build
+#
+# Bu override api'ni GPU-image bilan quradi, GPU'ni biriktiradi va provayderlarni
+# lokal + voice-clone rejimiga o'tkazadi.
+services:
+  api:
+    build:
+      context: ./1-backend
+      dockerfile: Dockerfile.gpu
+    environment:
+      # Voice cloning: har segment original ovozdan reference olib klonlaydi
+      TTS_PROVIDER: coqui
+      # STT ni GPU'da (tez + offline)
+      STT_PROVIDER: faster_whisper
+      WHISPER_DEVICE: cuda
+      WHISPER_COMPUTE_TYPE: float16
+      IMAGE_DEVICE: cuda
+      # GPU'da tabiiy tezlik uchun biroz erkinlik
+      MAX_TTS_SPEEDUP: "1.5"
+    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

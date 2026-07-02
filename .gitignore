@@ -1,0 +1,36 @@
+# ===== MAXFIY (hech qachon commit qilinmasin!) =====
+.env
+**/.env
+*.env
+!**/.env.example
+cookies.txt
+**/cookies.txt
+
+# ===== Katta/generatsiya fayllar =====
+storage/
+**/storage/
+models/
+**/models/
+*.pth
+*.apk
+*.mp4
+*.mp3
+*.wav
+
+# ===== Python =====
+__pycache__/
+**/__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+
+# ===== Flutter/Dart =====
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# ===== Node/boshqa =====
+node_modules/
+.DS_Store
