@@ -34,22 +34,31 @@ else
   echo ">> GPU yo'q — CPU rejimi (dublyaj baribir tez, voice clone sekin)"
 fi
 
-# --- 3. .env fayllar ---
+# --- 3. .env fayllar + kalitlarni so'rash (nano kerak emas) ---
 [ -f 1-backend/.env ] || cp 1-backend/.env.example 1-backend/.env
 [ -f 2-telegram-bot/.env ] || cp 2-telegram-bot/.env.example 2-telegram-bot/.env
 
+set_env() {  # fayl kalit qiymat
+  if grep -q "^$2=" "$1"; then
+    sed -i "s|^$2=.*|$2=\"$3\"|" "$1"
+  else
+    echo "$2=\"$3\"" >> "$1"
+  fi
+}
+
 echo ""
 echo "============================================"
-echo "  MUHIM: kalitlarni to'ldiring!"
+echo "  Kalitlarni kiriting (joylashtiring + Enter)"
 echo "============================================"
-echo "  nano 1-backend/.env       -> GROQ_API_KEYS, BASE_URL"
-echo "  nano 2-telegram-bot/.env  -> BOT_TOKEN"
-echo ""
-read -p "Kalitlarni to'ldirdingizmi? (ha = davom): " ans
-if [ "$ans" != "ha" ]; then
-  echo "Kalitlarni to'ldiring, keyin qayta: bash setup.sh"
-  exit 0
-fi
+read -p "Groq kalit(lar)i (vergul bilan ajrating): " GROQ_KEYS
+read -p "Telegram bot token: " BOT_TOKEN
+
+IP=$(curl -s ifconfig.me 2>/dev/null || echo "localhost")
+set_env 1-backend/.env GROQ_API_KEYS "$GROQ_KEYS"
+set_env 1-backend/.env BASE_URL "http://$IP:8000"
+set_env 2-telegram-bot/.env BOT_TOKEN "$BOT_TOKEN"
+[ "$GPU" = "1" ] && set_env 1-backend/.env TTS_PROVIDER "coqui" || set_env 1-backend/.env TTS_PROVIDER "edge"
+echo ">> Kalitlar saqlandi ✅"
 
 # --- 4. Ishga tushirish ---
 if [ "$GPU" = "1" ]; then
